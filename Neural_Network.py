@@ -18,9 +18,9 @@ variability = 1 # The factor by which weights and biases are changed, greater va
 inputNodesCount = 2 # The number of nodes in the input layer
 hiddenNodesCount = 2 # The number of nodes in the hidden layers, must be at least two
 outputNodesCount = 2 # The number of nodes in the output layer, must be at least two
-hiddenLayersCount = 3 # The number of hidden layers, must be at least one
+hiddenLayersCount = 2 # The number of hidden layers, must be at least one
 
-truthDict = { # The truth table by which the netwrok assesses itself. Looking for a better solution as this one is tiresome
+truthDict = { # The truth table by which the network assesses itself. Looking for a better solution as this one is tiresome
     "[0 0]": [np.array([0, 0]), np.array([0, 0])],
     "[1 0]": [np.array([1, 0]), np.array([1, 0])],
     "[0 1]": [np.array([0, 1]), np.array([1, 0])],
@@ -74,9 +74,7 @@ class Neural_Network:
 
         self.inputLayer = [np.array([0 for i in range(inputNodes)])] # Puts the input array in the input list
         
-        self.hiddenLayers = np.array([[0 for j in range(hiddenNodes)] for x in range(numHiddenLayers)])
-        '''for i in range(numHiddenLayers): # Runs for every hidden layer
-            self.hiddenLayers.append(np.array([0 for j in range(hiddenNodes)])) # Initialises a hidden layer array into the list '''
+        self.hiddenLayers = np.array([[float(0) for j in range(hiddenNodes)] for x in range(numHiddenLayers)])
         
         self.outputLayer = [np.array([0 for i in range(outputNodes)])] # Puts the output array into the output list
 
@@ -85,14 +83,12 @@ class Neural_Network:
         
         self.inputSynapses = [np.array([[float(0) for x in range(inputNodes)] for y in range(hiddenNodes)])] # Puts the input synapses array (2d) into the input synapses list
         
-        for i in range(numHiddenLayers - 1): # Runs for every hidden layer except the last one
-            self.hiddenSynapses.append(np.array([[float(0) for x in range(hiddenNodes)] for y in range(hiddenNodes)])) # Adds an array of snapses for every hidden layer, except the last one
-        self.hiddenSynapses.append(np.array([[float(0) for x in range(hiddenNodes)] for y in range(outputNodes)])) # Adds a final array with the synapses from the last hidden layer to the output layer
+        self.hiddenSynapses = np.array([[[float(0) for x in range(hiddenNodes)] for y in range(hiddenNodes)] for z in range(numHiddenLayers)]) # Adds an array of snapses for every hidden layer, except the last one
+        #self.hiddenSynapses.append(np.array([[float(0) for x in range(hiddenNodes)] for y in range(outputNodes)])) # Adds a final array with the synapses from the last hidden layer to the output layer
         
         self.synapses = [self.inputSynapses, self.hiddenSynapses] # A list that contains all the lists of synapses
 
-        for i in range(numHiddenLayers): # Runs for every hidden layer
-            self.hiddenBiases.append(np.array([float(1) for x in range(hiddenNodes)])) # Adds an array of biases for each hidden layer
+        self.hiddenBiases = np.array([[float(1) for j in range(hiddenNodes)] for x in range(numHiddenLayers)]) # Adds an array of biases for each hidden layer
 
         self.outputBiases = [np.array([float(1) for x in range(outputNodes)])] # initialises the output biases into a list
 
@@ -149,9 +145,9 @@ class Neural_Network:
 
         # Calculates the activations of the hidden layers
         for i in range(len(self.layers[1]) - 1): # Runs for each hidden layer, except the last one
-            self.layers[1][i + 1] = self.__Sigmoid(np.dot(self.synapses[1][i], self.layers[1][i]) + self.biases[1][i]) # Calculates the activations of the 'i+1'th hidden layer
+            self.layers[1][i + 1] = self.__Sigmoid(np.dot(self.synapses[1][i], self.layers[1][i]) + self.biases[0][i]) # Calculates the activations of the 'i+1'th hidden layer
 
-        self.layers[2][0] = self.__Sigmoid(np.dot(self.synapses[1][-1], self.layers[1][-1]) + self.biases[1][-1]) # Calculates the activations of the output layer
+        self.layers[2][0] = self.__Sigmoid(np.dot(self.synapses[1][-1], self.layers[1][-1]) + self.biases[0][-1]) # Calculates the activations of the output layer
     
     def __total_cost(self): # Calculates the average cost of a network for all possible inputs
         self.__costs = [] # Empties the list of costs
@@ -194,7 +190,7 @@ while True:
         currentProg = (i / gens) * 100 # Sets currentProg to the percentage of generations complete
         if ((currentProg - prevProg) > (4000 / gens)): # Runs this loop only infrequently, less often for greater numbers of generations
             currentTime = time.time() 
-            #os.system("cls") # Clears the terminal
+            os.system("cls") # Clears the terminal
             print(f"Progress: {currentProg}%") # Prints the percentage of progress through the simulation
 
             timePassed = (currentTime - start) # Calculates the time passed since this loop last ran
